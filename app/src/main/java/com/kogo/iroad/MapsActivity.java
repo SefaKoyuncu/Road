@@ -155,6 +155,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String humidity = null;
     private String cloud = null;
 
+    private String Location_currentTempC = null;
+    private String Location_wind_kph = null;
+    private String Location_humidity = null;
+    private String Location_cloud = null;
+
     //polyline object
     private List<Polyline> polylines = null;
     private List<Polyline> polyline1 = null;
@@ -382,19 +387,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
 
+
         binding.buttonSharing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MapsActivity.this, SharingActivity.class);
+
                 String myLocationString = null;
                 myLocationString = myLocationltlng.toString();
+
                 Log.e("myLocationString",myLocationString);
-                Log.e("currentTempC",currentTempC);
+                Log.e("currentTempC",Location_currentTempC);
+
+
                 intent.putExtra("myLocationltlng",myLocationString);
-                intent.putExtra("currentTempC",currentTempC);
-                intent.putExtra("wind_kph",wind_kph);
-                intent.putExtra("humidity",humidity);
-                intent.putExtra("currentTempC",cloud);
+                intent.putExtra("currentTempC",Location_currentTempC);
+                intent.putExtra("wind_kph",Location_wind_kph);
+                intent.putExtra("humidity",Location_humidity);
+                intent.putExtra("cloud",Location_cloud);
+
+                Log.e("myLocationString",myLocationString);
+                Log.e("currentTempC",Location_currentTempC);
+                Log.e("cloud",Location_cloud);
+                Log.e("wind_kph",Location_wind_kph);
+
                 startActivity(intent);
             }
         });
@@ -516,6 +532,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Log.e("Address size: ", String.valueOf(addresses.size()));
 
                                     myLocationltlng=new LatLng(addresses.get(0).getLatitude(),addresses.get(0).getLongitude()); //device location
+                                    getWeather(myLocationltlng.toString());
 
                                     CameraUpdate cameraUpdate = null;
                                     if(startLatLngFromEdittext != null){
@@ -1475,6 +1492,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 } catch (JSONException e) {
+
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                Log.e("error",error.toString());
+
+                if (error instanceof NoConnectionError) {
+                    Log.e("hata","temporaryUrl");
+                    Toast.makeText(getApplicationContext(),"Please Check Internet Connection", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }else{
+                    dialog.dismiss();
+                }
+            }
+        });
+
+
+        Volley.newRequestQueue(getApplicationContext()).add(stringRequest);
+
+    }
+
+    public void getWeather(String latlon)
+    {
+
+        String temporaryUrl = "";
+
+        String mainUrl = "https://api.weatherapi.com/v1/forecast.json?key=";
+        String weatherApiKey = "72a98768f162479cb79133207222605";
+
+
+        temporaryUrl = mainUrl + weatherApiKey + "&q=" + latlon + "&days=2&aqi=no&alerts=no" ;
+        //temporaryUrl = "https://api.weatherapi.com/v1/forecast.json?key=fa1fd96defb94768ac270319221208&q=39.925533,32.866287&days=2&aqi=no&alerts=no";;
+        Log.e("api weather ", temporaryUrl);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, temporaryUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+
+                    JSONObject jsonObject=new JSONObject(response);
+                    JSONObject jsonObjectLocation = jsonObject.getJSONObject("location");
+                    String name = jsonObjectLocation.getString("name");
+                    JSONObject jsonObjectCurrent = jsonObject.getJSONObject("current");
+                    Location_currentTempC = jsonObjectCurrent.getString("temp_c");
+                    JSONObject jsonObjectCondition=jsonObjectCurrent.getJSONObject("condition");
+                    Location_wind_kph = jsonObjectCurrent.getString("wind_kph");
+                    Location_humidity = jsonObjectCurrent.getString("humidity");
+                    Location_cloud = jsonObjectCurrent.getString("cloud");
+
+                }
+                catch (JSONException e)
+                {
 
                 }
 
