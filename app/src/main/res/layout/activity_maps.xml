@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
@@ -76,12 +79,19 @@
 
     <Button
         android:id="@+id/buttonSharing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="48dp"
+        android:background="@drawable/button_share"
         android:text="Share"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:visibility="invisible"
+        map:layout_constraintBottom_toBottomOf="@+id/buttonGo"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintStart_toEndOf="@+id/buttonGo"
-        map:layout_constraintTop_toTopOf="@+id/buttonGo" />
+        map:layout_constraintTop_toTopOf="@+id/buttonGo"
+        tools:backgroundTint="#99FFFFFF"
+      />
 
     <Button
         android:id="@+id/buttonGo"
@@ -290,3 +300,4 @@
         map:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

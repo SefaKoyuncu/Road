@@ -242,6 +242,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding.editTextTo.setOnClickListener(view -> {  writeAddressToPlace();   });
 
         binding.buttonShowTimeline.setEnabled(false);
+        binding.buttonSharing.setEnabled(false);
+
         binding.buttonShowTimeline.setOnClickListener(view -> {
             Map<String, String> markers1Infos = new HashMap<>();
             Map<String, String> markers2Infos = new HashMap<>();
@@ -393,20 +395,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 Intent intent = new Intent(MapsActivity.this, SharingActivity.class);
 
-                String myLocationString = null;
-                myLocationString = myLocationltlng.toString();
 
-                Log.e("myLocationString",myLocationString);
+
+                Log.e("myLocationString",myLocationltlng.toString());
                 Log.e("currentTempC",Location_currentTempC);
 
-
-                intent.putExtra("myLocationltlng",myLocationString);
+                intent.putExtra("locationLat",myLocationltlng.latitude);
+                intent.putExtra("locationLng",myLocationltlng.longitude);
                 intent.putExtra("currentTempC",Location_currentTempC);
                 intent.putExtra("wind_kph",Location_wind_kph);
                 intent.putExtra("humidity",Location_humidity);
                 intent.putExtra("cloud",Location_cloud);
 
-                Log.e("myLocationString",myLocationString);
+                Log.e("myLocationString",myLocationltlng.toString());
                 Log.e("currentTempC",Location_currentTempC);
                 Log.e("cloud",Location_cloud);
                 Log.e("wind_kph",Location_wind_kph);
@@ -444,6 +445,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fromLatLng = "" + fromPlaceLat + "," + fromPlaceLng;
             fromName = place.getName();
             fromAddress = place.getAddress().replace(" ", "");
+            Log.e("from",fromName);
+            Log.e("from",fromAddress);
 
         }
         if (requestCode == 200 && resultCode == RESULT_OK) {
@@ -455,6 +458,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             toLatLng = "" + toPlaceLat + "," + toPlaceLng;
             toName = place.getName();
             toAddress = place.getAddress().replace(" ", "");
+            Log.e("to",toAddress);
+            Log.e("to",toName);
+
 
         }
     }
@@ -532,7 +538,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Log.e("Address size: ", String.valueOf(addresses.size()));
 
                                     myLocationltlng=new LatLng(addresses.get(0).getLatitude(),addresses.get(0).getLongitude()); //device location
-                                    getWeather(myLocationltlng.toString());
+                                    getWeather(myLocationltlng.latitude+","+myLocationltlng.longitude);
 
                                     CameraUpdate cameraUpdate = null;
                                     if(startLatLngFromEdittext != null){
@@ -771,6 +777,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // arraylist route ise kaç farklı yol varsa ona bakıyor
 
         binding.buttonShowTimeline.setVisibility(View.VISIBLE);
+        binding.buttonSharing.setVisibility(View.VISIBLE);
+
         binding.buttonDirection.setVisibility(View.VISIBLE);
 
         if(polylines!=null || polyline1!=null || polyline2!=null) {
@@ -1215,7 +1223,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRoutingFailure(RouteException e) {
         binding.buttonShowTimeline.setEnabled(false);
+        binding.buttonSharing.setEnabled(false);
+
         binding.buttonShowTimeline.setVisibility(View.INVISIBLE);
+        binding.buttonSharing.setVisibility(View.INVISIBLE);
+
         binding.buttonDirection.setEnabled(false);
         binding.buttonDirection.setVisibility(View.INVISIBLE);
         dialog.setContentView(R.layout.no_road);
@@ -1474,18 +1486,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (countsTimesOfEnteredGetWeatherDetails == sum && tagPolyline!=null){
                         dialog.dismiss();
                         binding.buttonShowTimeline.setEnabled(true);
+                        binding.buttonSharing.setEnabled(true);
+
                         binding.buttonDirection.setEnabled(true);
                         showMarkers(tagPolyline, polyline);
                     }
                     if (((sum-countsTimesOfEnteredGetWeatherDetails)<=1)){
                         dialog.dismiss();
                         binding.buttonShowTimeline.setEnabled(true);
+                        binding.buttonSharing.setEnabled(true);
+
                         binding.buttonDirection.setEnabled(true);
                     }
                     if (sum>=15  && ((sum-countsTimesOfEnteredGetWeatherDetails)<=3)){
                         dialog.dismiss();
                         showMarkers(tagPolyline, polyline);
                         binding.buttonShowTimeline.setEnabled(true);
+                        binding.buttonSharing.setEnabled(true);
+
                         binding.buttonDirection.setEnabled(true);
                     }
 
@@ -1520,6 +1538,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void getWeather(String latlon)
     {
 
+        Log.e("latlon",latlon);
         String temporaryUrl = "";
 
         String mainUrl = "https://api.weatherapi.com/v1/forecast.json?key=";

@@ -4,55 +4,72 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kogo.iroad.databinding.ActivityMapsBinding;
+import com.kogo.iroad.databinding.ActivitySharingBinding;
+
 public class SharingActivity extends AppCompatActivity {
 
-    private TextView textview_myLocationltlng, textviewCurrentTempC, textViewWindKph, textViewHumidity, textViewCloud;
-    private Button buttonShareWp;
+    private ActivitySharingBinding binding;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sharing);
 
-        buttonShareWp = findViewById(R.id.buttonShareWp);
-        textview_myLocationltlng = findViewById(R.id.textview_myLocationltlng);
-        textviewCurrentTempC = findViewById(R.id.textviewCurrentTempC);
-        textViewWindKph = findViewById(R.id.textViewWindKph);
-        textViewHumidity = findViewById(R.id.textViewHumidity);
-        textViewCloud = findViewById(R.id.textViewCloud);
+        binding = ActivitySharingBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        String myLocationltlng = getIntent().getStringExtra("myLocationltlng");
+        double locationLat=getIntent().getDoubleExtra("locationLat",0.0);
+        double locationLng=getIntent().getDoubleExtra("locationLng",0.0);
+
         String currentTempC = getIntent().getStringExtra("currentTempC");
         String wind_kph = getIntent().getStringExtra("wind_kph");
         String humidity = getIntent().getStringExtra("humidity");
         String cloud = getIntent().getStringExtra("cloud");
 
-        textview_myLocationltlng.setText("My Location: " + myLocationltlng);
-        textviewCurrentTempC.setText("Current Temp C: : " + currentTempC);
-        textViewWindKph.setText("Wind Kph: " + wind_kph);
-        textViewHumidity.setText("Humadity: " + humidity);
-        textViewCloud.setText("Cloud: " + cloud);
 
-        buttonShareWp.setOnClickListener(new View.OnClickListener() {
+        binding.editTextLocation.setText(locationLat+","+locationLng);
+        binding.editTextTemp.setText(currentTempC);
+        binding.editTextWind.setText(wind_kph);
+        binding.editTextHumidity.setText(humidity);
+        binding.editTextCloud.setText(cloud);
+
+        binding.buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // https://stackoverflow.com/questions/12952865/how-to-share-text-to-whatsapp-from-my-app
-                Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
-                whatsappIntent.setType("text/plain");
-                whatsappIntent.setPackage("com.whatsapp");
-                whatsappIntent.putExtra(Intent.EXTRA_TEXT, "My Location: " + myLocationltlng + "\nCurrent Temp C: " + currentTempC + "\nWind Kph: " + wind_kph + "\nHumadity: " + humidity + "\nCloud: "+ cloud);
+
+
+                String uri = "https://www.google.com/maps/search/?api=1&query="+locationLat+"%2C"+locationLng;
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+
+                if(binding.editTextAddNote.getText().toString().isEmpty())
+                {
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,  "\t\t *--------INFORMATIONS--------* \n\n"+"*My Location :* " + Uri.parse(uri) + "\n*Current Temp °C :* " + currentTempC + "\n*Wind Kph :* " + wind_kph + "\n*Humadity :* " + humidity + "\n*Cloud :* "+ cloud);
+                }
+                else
+                {
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "\t\t *--------INFORMATIONS--------* \n\n"+"*My Location :* " + Uri.parse(uri) + "\n*Current Temp °C :* " + currentTempC + "\n*Wind Kph :* " + wind_kph + "\n*Humadity :* " + humidity + "\n*Cloud :* "+ cloud+ "\n*Note !!! :* "+binding.editTextAddNote.getText().toString());
+                }
+
                 try {
-                    SharingActivity.this.startActivity(whatsappIntent);
+                    startActivity(Intent.createChooser(sharingIntent, "Share in..."));
                 } catch (android.content.ActivityNotFoundException ex) {
                     // ToastHelper.MakeShortText("Whatsapp have not been installed.");
                 }
-            }
+                          }
+        });
+
+        binding.imageViewBack.setOnClickListener(view -> {
+
+            onBackPressed();
         });
 
 
